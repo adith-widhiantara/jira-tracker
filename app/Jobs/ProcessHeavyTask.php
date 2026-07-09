@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Events\TaskProgressUpdated;
+use App\Http\Services\JiraService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -11,22 +12,27 @@ class ProcessHeavyTask implements ShouldQueue
     use Queueable;
 
     protected string $jobId;
+    protected string $start;
+    protected string $end;
 
-    public function __construct(string $jobId)
+    public function __construct(string $jobId, int $start, int $end)
     {
         $this->jobId = $jobId;
+        $this->start = $start;
+        $this->end = $end;
     }
 
     public function handle(): void
     {
-        $totalSteps = 100;
+        $total = $this->end - $this->start + 1;
 
-        for ($i = 1; $i <= $totalSteps; $i++) {
-            // Simulasi pengerjaan komputasi berat (0.1 detik per step)
-            usleep(100000); 
+        for ($i = $this->start; $i <= $this->end; $i++) {
+            $service = new JiraService();
+            $service->getTicket($i);
 
-            // Tembakkan progres terupdate ke channel WebSocket
-            broadcast(new TaskProgressUpdated($this->jobId, $i));
+            // Tembakkan progres terupdate (persentase) ke channel WebSocket
+            $percent = (int) round((($i - $this->start + 1) / $total) * 100);
+            broadcast(new TaskProgressUpdated($this->jobId, $percent));
         }
     }
 }

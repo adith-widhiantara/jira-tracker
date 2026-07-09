@@ -13,8 +13,11 @@ class TaskController extends Controller
         // Buat ID unik untuk melacak progress transaksi ini
         $jobId = (string) Str::uuid();
 
+        $start = (int) $request->input('start');
+        $end = (int) $request->input('end');
+
         // Lempar ke Queue Worker (Redis)
-        ProcessHeavyTask::dispatch($jobId);
+        ProcessHeavyTask::dispatch($jobId, $start, $end);
 
         // Langsung kembalikan respons ke klien tanpa menunggu proses di atas selesai
         return response()->json([
