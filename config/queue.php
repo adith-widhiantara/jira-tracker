@@ -71,6 +71,7 @@ return [
             'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 90),
             'block_for' => null,
             'after_commit' => false,
+            'timeout' => 0
         ],
 
         'deferred' => [

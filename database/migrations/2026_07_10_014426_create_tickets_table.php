@@ -13,8 +13,11 @@ return new class extends Migration
     {
         Schema::create('tickets', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('link_ticket');
+            $table->string('link_ticket')->unique();
             $table->string('summary');
+            $table->string('request_key');
+            $table->string('response_key');
+            $table->dateTime('task_created');
             $table->string('assignee')->nullable();
             $table->unsignedInteger('estimate_timetracking')->nullable();
             $table->unsignedInteger('remaining_timetracking')->nullable();
