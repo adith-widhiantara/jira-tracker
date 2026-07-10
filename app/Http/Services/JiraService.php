@@ -33,8 +33,11 @@ class JiraService extends Service
             })->all();
 
         Log::debug([
-            'ticket' => $ticket,
+            'ticket' => 'https://sevima.atlassian.net/browse/ECHO-' . $ticket,
             'summary' => $result['fields']['summary'],
+            'assignee' => $result['fields']['assignee']['displayName'] ?? null,
+            'estimate_timetracking' => $result['fields']['timetracking']['originalEstimateSeconds'] ?? null,
+            'remaining_timetracking' => $result['fields']['timetracking']['remainingEstimateSeconds'] ?? null,
             'history' => $statusHistories
         ]);
     }
