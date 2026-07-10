@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 export default function Dashboard() {
     const [progress, setProgress] = useState(0);
     const [status, setStatus] = useState('idle'); // idle, processing, completed
+    const [teamName, setTeamName] = useState('ECHO');
     const [codePattern, setCodePattern] = useState('');
     const [logs, setLogs] = useState([]);
     
@@ -66,6 +67,7 @@ export default function Dashboard() {
                     localStorage.removeItem('jira_sync_progress');
                     localStorage.removeItem('jira_sync_logs');
                     localStorage.removeItem('jira_sync_pattern');
+                    localStorage.removeItem('jira_sync_team_name');
                     
                     // Putuskan langganan WebSocket Reverb
                     window.Echo.leave(`task.${jobId}`);
@@ -82,7 +84,7 @@ export default function Dashboard() {
 
         try {
             // 1. Trigger aksi async ke backend dengan mengirim parameter codepattern
-            const response = await window.axios.post(route('task.trigger'), { codepattern: codePattern });
+            const response = await window.axios.post(route('task.trigger'), { codepattern: codePattern, teamName: teamName });
             const { jobId } = response.data;
 
             // 2. Kunci state ke dalam localStorage agar kebal terhadap F5 / Reload halaman
@@ -91,6 +93,7 @@ export default function Dashboard() {
             localStorage.setItem('jira_sync_progress', '0');
             localStorage.setItem('jira_sync_logs', JSON.stringify([initialLog]));
             localStorage.setItem('jira_sync_pattern', codePattern);
+            localStorage.setItem('jira_sync_team_name', teamName);
 
             // 3. Mulai mendengarkan Reverb
             connectWebSocket(jobId);
@@ -111,6 +114,19 @@ export default function Dashboard() {
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg p-6">
+
+                        {/* INPUT TIM NAME */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700">Team Name (contoh: Echo)</label>
+                            <input
+                                type="text"
+                                value={teamName}
+                                disabled={status === 'processing'}
+                                onChange={(e) => setTeamName(e.target.value)}
+                                placeholder="ECHO"
+                                className="mt-1 w-full rounded border-gray-300 shadow-sm disabled:bg-gray-100 disabled:text-gray-500"
+                            />
+                        </div>
                         
                         {/* INPUT CODE PATTERN */}
                         <div className="mb-6">

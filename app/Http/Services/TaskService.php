@@ -14,11 +14,12 @@ class TaskService extends Service
         $jobId = (string) Str::uuid();
 
         $codepattern = (string) $request->input('codepattern');
+        $teamName = (string) $request->input('teamName');
 
         $code = (array) $this->updateToCode($codepattern);
 
         // Lempar ke Queue Worker (Redis)
-        ProcessHeavyTask::dispatch($jobId, $code);
+        ProcessHeavyTask::dispatch($jobId, $code, $teamName);
 
         // Langsung kembalikan respons ke klien tanpa menunggu proses di atas selesai
         return response()->json([

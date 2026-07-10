@@ -13,20 +13,23 @@ class ProcessHeavyTask implements ShouldQueue
 
     protected string $jobId;
     protected array $code;
+    protected string $teamName;
 
-    public function __construct(string $jobId, array $code)
+    public function __construct(string $jobId, array $code, string $teamName)
     {
         $this->jobId = $jobId;
         $this->code = $code;
+        $this->teamName = $teamName;
     }
 
     public function handle(): void
     {
         $total = count($this->code);
         $service = new JiraService();
+        $teamName = $this->teamName;
 
         foreach ($this->code as $index => $ticketNumber) {
-            $result = $service->getTicket($ticketNumber);
+            $result = $service->getTicket($ticketNumber, $teamName);
 
             // Tembakkan progres terupdate (persentase) ke channel WebSocket
             $percent = (int) round((($index + 1) / $total) * 100);

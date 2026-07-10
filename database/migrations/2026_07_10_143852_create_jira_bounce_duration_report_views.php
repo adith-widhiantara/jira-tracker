@@ -15,7 +15,8 @@ return new class extends Migration
         DB::statement(<<<'SQL'
             CREATE OR REPLACE VIEW jira_bounce_duration_report AS
             SELECT
-                t.request_key,
+                t.request_key       as jira_code,
+                SPLIT_PART(t.request_key, '-', 1)    AS tim,
                 t.summary,
                 t.assignee,
                 th."from"           AS status_asal,

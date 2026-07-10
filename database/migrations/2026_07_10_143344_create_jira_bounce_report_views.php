@@ -19,10 +19,10 @@ return new class extends Migration
                     th.ticket_id,
                     th."from",
                     th."to",
-                    CASE WHEN th."from" = 'In Progress' 
+                    CASE WHEN th."from" = 'In Progress'
                             AND th."to" IN ('Testing', 'Feedback QA')
                         THEN 1 ELSE 0 END AS ke_qa,
-                    CASE WHEN th."from" IN ('Testing', 'Feedback QA') 
+                    CASE WHEN th."from" IN ('Testing', 'Feedback QA')
                             AND th."to" = 'In Progress'
                         THEN 1 ELSE 0 END AS balik_ke_progress
                 FROM ticket_histories th
@@ -45,7 +45,8 @@ return new class extends Migration
                 GROUP BY th.ticket_id
             )
             SELECT
-                t.request_key,
+                t.request_key as jira_code,
+                SPLIT_PART(t.request_key, '-', 1)    AS tim,
                 t.summary,
                 t.assignee,
                 COALESCE(ts.jumlah_masuk_qa, 0)      AS jumlah_masuk_qa,

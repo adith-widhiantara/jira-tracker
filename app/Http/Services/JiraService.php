@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\Log;
 
 class JiraService extends Service
 {
-    public function getTicket(int $ticket): string
+    public function getTicket(int $ticket, string $teamName): string
     {
-        $url = config('jira.url') . '/issue/ECHO-' . $ticket . '?expand=changelog';
+        $url = config('jira.url') . '/issue/' . $teamName . '-' . $ticket . '?expand=changelog';
 
         $response = Http::withBasicAuth(config('jira.username'), config('jira.token'))
             ->get($url);
@@ -27,7 +27,7 @@ class JiraService extends Service
                 'data' => $result
             ]);
 
-            return 'Ticket ECHO-' . $ticket . ' tidak dapat diakses.';
+            return 'Ticket ' . $teamName . '-' . $ticket . ' tidak dapat diakses.';
         }
 
         Log::debug([
@@ -53,9 +53,9 @@ class JiraService extends Service
             })->all();
 
         $ticketModel = Ticket::updateOrCreate(
-            ['link_ticket' => 'https://sevima.atlassian.net/browse/ECHO-' . $ticket],
+            ['link_ticket' => 'https://sevima.atlassian.net/browse/' . $teamName . '-' . $ticket],
             [
-                'request_key' => 'ECHO-' . $ticket,
+                'request_key' => '' . $teamName . '-' . $ticket,
                 'response_key' => $result['key'],
                 'task_created' => Carbon::parse($result['fields']['created']),
                 'summary' => $result['fields']['summary'],
@@ -82,6 +82,6 @@ class JiraService extends Service
             $previousCreatedAt = $createdAt;
         }
 
-        return 'Ticket ECHO-' . $ticket . ' berhasil dapat diakses.';
+        return 'Ticket ' . $teamName . '-' . $ticket . ' berhasil dapat diakses.';
     }
 }
