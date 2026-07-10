@@ -5,8 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 export default function Dashboard() {
     const [progress, setProgress] = useState(0);
     const [status, setStatus] = useState('idle'); // idle, processing, completed
-    const [start, setStart] = useState(0);
-    const [end, setEnd] = useState(0);
+    const [codePattern, setCodePattern] = useState('');
     const [logs, setLogs] = useState([]);
     
     const logsEndRef = useRef(null);
@@ -22,12 +21,10 @@ export default function Dashboard() {
         const savedStatus = localStorage.getItem('jira_sync_status');
         const savedProgress = localStorage.getItem('jira_sync_progress');
         const savedLogs = localStorage.getItem('jira_sync_logs');
-        
-        // Pulihkan nilai input start & end dari local storage jika ada
-        const savedStart = localStorage.getItem('jira_sync_start');
-        const savedEnd = localStorage.getItem('jira_sync_end');
-        if (savedStart) setStart(Number(savedStart));
-        if (savedEnd) setEnd(Number(savedEnd));
+
+        // Pulihkan nilai input code pattern dari local storage jika ada
+        const savedPattern = localStorage.getItem('jira_sync_pattern');
+        if (savedPattern) setCodePattern(savedPattern);
 
         if (savedJobId && savedStatus === 'processing') {
             setStatus('processing');
@@ -68,8 +65,7 @@ export default function Dashboard() {
                     localStorage.removeItem('jira_sync_status');
                     localStorage.removeItem('jira_sync_progress');
                     localStorage.removeItem('jira_sync_logs');
-                    localStorage.removeItem('jira_sync_start');
-                    localStorage.removeItem('jira_sync_end');
+                    localStorage.removeItem('jira_sync_pattern');
                     
                     // Putuskan langganan WebSocket Reverb
                     window.Echo.leave(`task.${jobId}`);
@@ -81,12 +77,12 @@ export default function Dashboard() {
         setStatus('processing');
         setProgress(0);
         
-        const initialLog = `[${new Date().toLocaleTimeString()}] Menginisialisasi koneksi sinkronisasi Jira untuk range: ${start} s/d ${end}...`;
+        const initialLog = `[${new Date().toLocaleTimeString()}] Menginisialisasi koneksi sinkronisasi Jira untuk pattern: ${codePattern}...`;
         setLogs([initialLog]);
 
         try {
-            // 1. Trigger aksi async ke backend dengan mengirim parameter start dan end
-            const response = await window.axios.post(route('task.trigger'), { start, end });
+            // 1. Trigger aksi async ke backend dengan mengirim parameter codepattern
+            const response = await window.axios.post(route('task.trigger'), { codepattern: codePattern });
             const { jobId } = response.data;
 
             // 2. Kunci state ke dalam localStorage agar kebal terhadap F5 / Reload halaman
@@ -94,8 +90,7 @@ export default function Dashboard() {
             localStorage.setItem('jira_sync_status', 'processing');
             localStorage.setItem('jira_sync_progress', '0');
             localStorage.setItem('jira_sync_logs', JSON.stringify([initialLog]));
-            localStorage.setItem('jira_sync_start', start.toString());
-            localStorage.setItem('jira_sync_end', end.toString());
+            localStorage.setItem('jira_sync_pattern', codePattern);
 
             // 3. Mulai mendengarkan Reverb
             connectWebSocket(jobId);
@@ -117,28 +112,17 @@ export default function Dashboard() {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg p-6">
                         
-                        {/* INPUT SELECTION RANGE */}
-                        <div className="mb-6 flex gap-4">
-                            <div className="flex-1">
-                                <label className="block text-sm font-medium text-gray-700">Awal</label>
-                                <input
-                                    type="number"
-                                    value={start}
-                                    disabled={status === 'processing'}
-                                    onChange={(e) => setStart(Number(e.target.value))}
-                                    className="mt-1 w-full rounded border-gray-300 shadow-sm disabled:bg-gray-100 disabled:text-gray-500"
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <label className="block text-sm font-medium text-gray-700">Akhir</label>
-                                <input
-                                    type="number"
-                                    value={end}
-                                    disabled={status === 'processing'}
-                                    onChange={(e) => setEnd(Number(e.target.value))}
-                                    className="mt-1 w-full rounded border-gray-300 shadow-sm disabled:bg-gray-100 disabled:text-gray-500"
-                                />
-                            </div>
+                        {/* INPUT CODE PATTERN */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700">Pattern (contoh: 1-5,7)</label>
+                            <input
+                                type="text"
+                                value={codePattern}
+                                disabled={status === 'processing'}
+                                onChange={(e) => setCodePattern(e.target.value)}
+                                placeholder="1-5,7"
+                                className="mt-1 w-full rounded border-gray-300 shadow-sm disabled:bg-gray-100 disabled:text-gray-500"
+                            />
                         </div>
 
                         {/* TRIGGER BUTTON */}

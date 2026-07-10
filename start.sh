@@ -23,8 +23,8 @@ echo "Menunggu inisialisasi Docker & Jaringan..."
 sleep 5
 
 # --- LANGKAH 3: SEGARKAN DATABASE ---
-echo "Menjalankan migrasi database baru..."
-./vendor/bin/sail artisan migrate:fresh --seed
+echo "Menjalankan migrasi database..."
+./vendor/bin/sail artisan migrate
 
 # --- LANGKAH 4: AKTIFKAN BACKGROUND PROCESS ---
 # Menggunakan --timeout=0 untuk mencegah hilangnya koneksi asinkronus akibat pembatasan waktu Symfony
