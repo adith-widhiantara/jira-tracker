@@ -26,13 +26,13 @@ class ProcessHeavyTask implements ShouldQueue
     {
         $total = $this->end - $this->start + 1;
 
-        for ($i = $this->start; $i <= $this->end; $i++) {
+        for ($i = $this->start; $i <= $this->end + 1; $i++) {
             $service = new JiraService();
-            $service->getTicket($i);
+            $result = $service->getTicket($i);
 
             // Tembakkan progres terupdate (persentase) ke channel WebSocket
             $percent = (int) round((($i - $this->start + 1) / $total) * 100);
-            broadcast(new TaskProgressUpdated($this->jobId, $percent));
+            broadcast(new TaskProgressUpdated($this->jobId, $percent, $result));
         }
     }
 }

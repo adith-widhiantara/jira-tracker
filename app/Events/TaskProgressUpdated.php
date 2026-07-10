@@ -19,14 +19,16 @@ class TaskProgressUpdated implements ShouldBroadcastNow
 
     public string $jobId;
     public int $progress;
+    public ?string $logMessage;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(string $jobId, int $progress)
+    public function __construct(string $jobId, int $progress, string $logMessage)
     {
         $this->jobId = $jobId;
         $this->progress = $progress;
+        $this->logMessage = $logMessage;
     }
 
     /**
@@ -36,7 +38,6 @@ class TaskProgressUpdated implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
-        // Menyiarkan ke channel publik yang spesifik untuk jobId ini
         return [
             new Channel("task.{$this->jobId}"),
         ];

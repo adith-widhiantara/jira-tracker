@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Services;
 
 use App\Models\Ticket;
@@ -9,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class JiraService extends Service
 {
-    public function getTicket(int $ticket): void
+    public function getTicket(int $ticket): string
     {
         $url = config('jira.url') . '/issue/ECHO-' . $ticket . '?expand=changelog';
 
@@ -25,7 +27,7 @@ class JiraService extends Service
                 'data' => $result
             ]);
 
-            return;
+            return 'Ticket ECHO-' . $ticket . ' tidak dapat diakses.';
         }
 
         Log::debug([
@@ -79,5 +81,7 @@ class JiraService extends Service
 
             $previousCreatedAt = $createdAt;
         }
+
+        return 'Ticket ECHO-' . $ticket . ' berhasil dapat diakses.';
     }
 }
