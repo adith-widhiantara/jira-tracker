@@ -28,6 +28,10 @@ class JiraService extends Service
             return;
         }
 
+        Log::debug([
+            'url' => $url
+        ]);
+
         $statusHistories = collect(data_get($result, 'changelog.histories', []))
             ->flatMap(function ($history) {
                 return collect(data_get($history, 'items', []))->map(function ($item) use ($history) {
